@@ -1,0 +1,19 @@
+syntax = "v1"
+
+type PingReq {
+	Msg string `json:"msg"`
+}
+
+type PingResp {
+	Msg string `json:"msg"`
+}
+
+@server (
+	group: test
+)
+service app {
+	@doc "ping"
+	@handler Ping
+	get /ping (PingReq) returns (PingResp)
+}
+
