@@ -4,8 +4,8 @@ package handler
 import (
 	"net/http"
 
-	test "go-zero-websocket/internal/handler/test"
-	"go-zero-websocket/internal/svc"
+	test "go-zero-websocket-demo/internal/handler/test"
+	"go-zero-websocket-demo/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )

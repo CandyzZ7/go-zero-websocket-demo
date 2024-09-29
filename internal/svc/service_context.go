@@ -1,8 +1,8 @@
 package svc
 
 import (
-	"go-zero-websocket/internal/config"
-	websocket "go-zero-websocket/pkg"
+	"go-zero-websocket-demo/internal/config"
+	websocket "go-zero-websocket-demo/pkg"
 )
 
 type ServiceContext struct {

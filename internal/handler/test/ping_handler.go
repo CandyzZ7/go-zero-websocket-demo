@@ -7,11 +7,12 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"go-zero-websocket/internal/logic/test"
-	"go-zero-websocket/internal/svc"
-	"go-zero-websocket/internal/types"
 
-	"go-zero-websocket/pkg"
+	"go-zero-websocket-demo/internal/logic/test"
+	"go-zero-websocket-demo/internal/svc"
+	"go-zero-websocket-demo/internal/types"
+
+	"go-zero-websocket-demo/pkg"
 )
 
 // ping

@@ -1,4 +1,4 @@
-module go-zero-websocket
+module go-zero-websocket-demo
 
 go 1.23.1
 

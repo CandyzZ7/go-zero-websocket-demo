@@ -3,10 +3,10 @@ package test
 import (
 	"context"
 
-	"go-zero-websocket/internal/svc"
-	"go-zero-websocket/internal/types"
-
 	"github.com/zeromicro/go-zero/core/logx"
+
+	"go-zero-websocket-demo/internal/svc"
+	"go-zero-websocket-demo/internal/types"
 )
 
 type PingLogic struct {

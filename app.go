@@ -7,9 +7,9 @@ import (
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
 
-	"go-zero-websocket/internal/config"
-	"go-zero-websocket/internal/handler"
-	"go-zero-websocket/internal/svc"
+	"go-zero-websocket-demo/internal/config"
+	"go-zero-websocket-demo/internal/handler"
+	"go-zero-websocket-demo/internal/svc"
 )
 
 var configFile = flag.String("f", "etc/app.yaml", "the config file")
