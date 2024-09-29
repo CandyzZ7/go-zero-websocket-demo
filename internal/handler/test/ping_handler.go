@@ -50,9 +50,8 @@ func PingHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			l := test.NewPingLogic(r.Context(), svcCtx)
 			resp, err := l.Ping(&req)
 			if err != nil {
-				httpx.ErrorCtx(r.Context(), w, err)
-			} else {
-				httpx.OkJsonCtx(r.Context(), w, resp)
+				logc.Error(r.Context(), err)
+				continue // 处理错误但不再写 HTTP 响应
 			}
 
 			bytes, err := json.Marshal(resp)

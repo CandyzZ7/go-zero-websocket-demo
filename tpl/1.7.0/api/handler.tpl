@@ -8,7 +8,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	{{.ImportPackages}}
-	"go-zero-websocket/pkg"
+	"go-zero-websocket-demo/pkg"
 )
 
 {{if .HasDoc}}{{.Doc}}{{end}}
@@ -45,11 +45,10 @@ func {{.HandlerName}}(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
             {{end}}l := {{.LogicName}}.New{{.LogicType}}(r.Context(), svcCtx)
             {{if .HasResp}}resp, {{end}}err := l.{{.Call}}({{if .HasRequest}}&req{{end}})
-            if err != nil {
-                httpx.ErrorCtx(r.Context(), w, err)
-            } else {
-                {{if .HasResp}}httpx.OkJsonCtx(r.Context(), w, resp){{else}}httpx.Ok(w){{end}}
-            }
+			if err != nil {
+				logc.Error(r.Context(), err)
+				continue
+			}
 
             bytes, err := json.Marshal(resp)
             if err != nil {
