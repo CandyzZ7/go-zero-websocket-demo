@@ -1,4 +1,4 @@
-package pkg
+package websocketx
 
 import (
 	"encoding/json"

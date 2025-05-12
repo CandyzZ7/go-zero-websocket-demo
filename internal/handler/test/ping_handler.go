@@ -2,22 +2,23 @@ package test
 
 import (
 	"encoding/json"
-	"github.com/gorilla/websocket"
-	"github.com/zeromicro/go-zero/rest/httpx"
-	"go-zero-websocket-demo/internal/logic/test"
-	"go-zero-websocket-demo/internal/types"
 	"net/http"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logc"
+	"github.com/zeromicro/go-zero/rest/httpx"
+	"go-zero-websocket-demo/internal/logic/test"
 	"go-zero-websocket-demo/internal/svc"
-	"go-zero-websocket-demo/pkg"
+	"go-zero-websocket-demo/internal/types"
+
+	"go-zero-websocket-demo/pkg/websocketx"
 )
 
 // ping
 func PingHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		conn, err := pkg.Upgrader.Upgrade(w, r, nil)
+		conn, err := websocketx.Upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			logc.Errorf(r.Context(), "Error upgrading to WebSocket: %v", err)
 			return
@@ -25,12 +26,12 @@ func PingHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		currentTime := uint64(time.Now().Unix())
 		h := svcCtx.WSHub
-		c := pkg.NewClient(h, conn.RemoteAddr().String(), conn, currentTime)
+		c := websocketx.NewClient(h, conn.RemoteAddr().String(), conn, currentTime)
 		h.Register <- c
 
 		go c.WritePump()
 
-		go func(client *pkg.Client) {
+		go func(client *websocketx.Client) {
 			for {
 				_, message, err := conn.ReadMessage()
 				if err != nil {
@@ -50,7 +51,7 @@ func PingHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 				resp, err := l.Ping(&req)
 				if err != nil {
 					logc.Error(r.Context(), err)
-					continue // 处理错误但不再写 HTTP 响应
+					continue
 				}
 
 				bytes, err := json.Marshal(resp)

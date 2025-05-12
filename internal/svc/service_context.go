@@ -2,17 +2,17 @@ package svc
 
 import (
 	"go-zero-websocket-demo/internal/config"
-	websocket "go-zero-websocket-demo/pkg"
+	"go-zero-websocket-demo/pkg/websocketx"
 )
 
 type ServiceContext struct {
 	Config config.Config
-	WSHub  *websocket.Hub
+	WSHub  *websocketx.Hub
 	// 其他服务...
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	wsHub := websocket.NewHub()
+	wsHub := websocketx.NewHub()
 	go wsHub.Run()
 
 	return &ServiceContext{
