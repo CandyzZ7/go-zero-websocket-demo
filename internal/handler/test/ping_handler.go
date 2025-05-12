@@ -2,16 +2,15 @@ package test
 
 import (
 	"encoding/json"
-	"net/http"
-
 	"github.com/gorilla/websocket"
-	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/rest/httpx"
-
 	"go-zero-websocket-demo/internal/logic/test"
-	"go-zero-websocket-demo/internal/svc"
 	"go-zero-websocket-demo/internal/types"
+	"net/http"
+	"time"
 
+	"github.com/zeromicro/go-zero/core/logc"
+	"go-zero-websocket-demo/internal/svc"
 	"go-zero-websocket-demo/pkg"
 )
 
@@ -24,42 +23,43 @@ func PingHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		c := &pkg.Connection{Conn: conn}
+		currentTime := uint64(time.Now().Unix())
 		h := svcCtx.WSHub
+		c := pkg.NewClient(h, conn.RemoteAddr().String(), conn, currentTime)
 		h.Register <- c
 
-		defer func() {
-			h.Unregister <- c
-		}()
+		go c.WritePump()
 
-		for {
-			_, message, err := conn.ReadMessage()
-			if err != nil {
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					logc.Errorf(r.Context(), "Error reading message: %v", err)
+		go func(client *pkg.Client) {
+			for {
+				_, message, err := conn.ReadMessage()
+				if err != nil {
+					if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+						logc.Errorf(r.Context(), "Error reading message: %v", err)
+					}
+					break
 				}
-				break
-			}
-			var req types.PingReq
-			err = json.Unmarshal(message, &req)
-			if err != nil {
-				httpx.ErrorCtx(r.Context(), w, err)
-				return
-			}
+				var req types.PingReq
+				err = json.Unmarshal(message, &req)
+				if err != nil {
+					httpx.ErrorCtx(r.Context(), w, err)
+					return
+				}
 
-			l := test.NewPingLogic(r.Context(), svcCtx)
-			resp, err := l.Ping(&req)
-			if err != nil {
-				logc.Error(r.Context(), err)
-				continue // 处理错误但不再写 HTTP 响应
-			}
+				l := test.NewPingLogic(r.Context(), svcCtx)
+				resp, err := l.Ping(&req)
+				if err != nil {
+					logc.Error(r.Context(), err)
+					continue // 处理错误但不再写 HTTP 响应
+				}
 
-			bytes, err := json.Marshal(resp)
-			if err != nil {
-				logc.Error(r.Context(), err)
-				return
+				bytes, err := json.Marshal(resp)
+				if err != nil {
+					logc.Error(r.Context(), err)
+					return
+				}
+				c.Send <- bytes
 			}
-			h.Broadcast <- bytes
-		}
+		}(c)
 	}
 }

@@ -15,47 +15,48 @@ import (
 func {{.HandlerName}}(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
         conn, err := pkg.Upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			logc.Errorf(r.Context(), "Error upgrading to WebSocket: %v", err)
+			return
+		}
+
+		currentTime := uint64(time.Now().Unix())
+		h := svcCtx.WSHub
+		c := pkg.NewClient(h, conn.RemoteAddr().String(), conn, currentTime)
+		h.Register <- c
+
+		go c.WritePump()
+
+		go func(client *pkg.Client) {
+			for {
+				_, message, err := conn.ReadMessage()
+				if err != nil {
+					if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+						logc.Errorf(r.Context(), "Error reading message: %v", err)
+					}
+					break
+				}
+                {{if .HasRequest}}var req types.{{.RequestType}}
+                err = json.Unmarshal(message, &req)
                 if err != nil {
-                    logc.Errorf(r.Context(),"Error upgrading to WebSocket: %v", err)
+                    httpx.ErrorCtx(r.Context(), w, err)
                     return
                 }
 
-                c := &pkg.Connection{Conn: conn}
-                h := svcCtx.WSHub
-                h.Register <- c
+                {{end}}l := {{.LogicName}}.New{{.LogicType}}(r.Context(), svcCtx)
+                {{if .HasResp}}resp, {{end}}err := l.{{.Call}}({{if .HasRequest}}&req{{end}})
+			    if err != nil {
+				    logc.Error(r.Context(), err)
+				    continue
+			    }
 
-                defer func() {
-                    h.Unregister <- c
-                }()
-
-        for {
-            _, message, err := conn.ReadMessage()
-            if err != nil {
-                if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-                    logc.Errorf(r.Context(),"Error reading message: %v", err)
+                bytes, err := json.Marshal(resp)
+                if err != nil {
+                    logc.Error(r.Context(), err)
+                    return
                 }
-                break
-            }
-            {{if .HasRequest}}var req types.{{.RequestType}}
-            err = json.Unmarshal(message, &req)
-            if err != nil {
-                httpx.ErrorCtx(r.Context(), w, err)
-                return
-            }
-
-            {{end}}l := {{.LogicName}}.New{{.LogicType}}(r.Context(), svcCtx)
-            {{if .HasResp}}resp, {{end}}err := l.{{.Call}}({{if .HasRequest}}&req{{end}})
-			if err != nil {
-				logc.Error(r.Context(), err)
-				continue
+            	c.Send <- bytes
 			}
-
-            bytes, err := json.Marshal(resp)
-            if err != nil {
-                logc.Error(r.Context(), err)
-                return
-            }
-            h.Broadcast <- bytes
-		}
+		}(c)
 	}
 }
