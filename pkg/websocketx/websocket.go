@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	pongWait   = 60 * time.Second
-	pingPeriod = (pongWait * 9) / 10
+	pongWait                = 60 * time.Second
+	pingPeriod              = (pongWait * 9) / 10
+	heartbeatExpirationTime = 6 * 60
 )
 
 var Upgrader = websocket.Upgrader{
@@ -55,25 +56,6 @@ func NewClient(h *Hub, addr string, conn *websocket.Conn, firstTime uint64) (cli
 	return
 }
 
-// 用户登录
-type login struct {
-	AppID  uint32
-	UserID string
-	Client *Client
-}
-
-// GetKey 获取 key
-func (l *login) GetKey() (key string) {
-	key = GetUserKey(l.AppID, l.UserID)
-	return
-}
-
-// GetUserKey 获取用户key
-func GetUserKey(appID uint32, userID string) (key string) {
-	key = fmt.Sprintf("%d_%s", appID, userID)
-	return
-}
-
 type Hub struct {
 	Clients     map[*Client]bool   // 全部的连接
 	ClientsLock sync.RWMutex       // 读写锁
@@ -94,6 +76,25 @@ func NewHub() *Hub {
 		Unregister: make(chan *Client, 1000),
 		Broadcast:  make(chan []byte, 1000),
 	}
+}
+
+// 用户登录
+type login struct {
+	AppID  uint32
+	UserID string
+	Client *Client
+}
+
+// GetKey 获取 key
+func (l *login) GetKey() (key string) {
+	key = GetUserKey(l.AppID, l.UserID)
+	return
+}
+
+// GetUserKey 获取用户key
+func GetUserKey(appID uint32, userID string) (key string) {
+	key = fmt.Sprintf("%d_%s", appID, userID)
+	return
 }
 
 func (h *Hub) Run() {
@@ -217,6 +218,105 @@ func (h *Hub) SendMessage(message []byte) {
 	}
 }
 
+// GetClients 获取所有客户端
+func (h *Hub) GetClients() (clients map[*Client]bool) {
+	clients = make(map[*Client]bool)
+	h.ClientsRange(func(client *Client, value bool) (result bool) {
+		clients[client] = value
+		return true
+	})
+	return
+}
+
+// ClientsRange 遍历
+func (h *Hub) ClientsRange(f func(client *Client, value bool) (result bool)) {
+	h.ClientsLock.RLock()
+	defer h.ClientsLock.RUnlock()
+	for key, value := range h.Clients {
+		result := f(key, value)
+		if result == false {
+			return
+		}
+	}
+	return
+}
+
+// GetClientsLen GetClientsLen
+func (h *Hub) GetClientsLen() (clientsLen int) {
+	clientsLen = len(h.Clients)
+	return
+}
+
+// GetUserClient 获取用户的连接
+func (h *Hub) GetUserClient(appID uint32, userID string) (client *Client) {
+	h.UserLock.RLock()
+	defer h.UserLock.RUnlock()
+	userKey := GetUserKey(appID, userID)
+	if value, ok := h.Users[userKey]; ok {
+		client = value
+	}
+	return
+}
+
+// GetUsersLen GetClientsLen
+func (h *Hub) GetUsersLen() (userLen int) {
+	userLen = len(h.Users)
+	return
+}
+
+// GetUserKeys 获取用户的key
+func (h *Hub) GetUserKeys() (userKeys []string) {
+	userKeys = make([]string, 0, len(h.Users))
+	for key := range h.Users {
+		userKeys = append(userKeys, key)
+	}
+	return
+}
+
+// GetUserList 获取用户 list
+func (h *Hub) GetUserList(appID uint32) (userList []string) {
+	userList = make([]string, 0)
+	h.UserLock.RLock()
+	defer h.UserLock.RUnlock()
+	for _, v := range h.Users {
+		if v.AppID == appID {
+			userList = append(userList, v.UserID)
+		}
+	}
+	return
+}
+
+// GetUserClients 获取用户的key
+func (h *Hub) GetUserClients() (clients []*Client) {
+	clients = make([]*Client, 0)
+	h.UserLock.RLock()
+	defer h.UserLock.RUnlock()
+	for _, v := range h.Users {
+		clients = append(clients, v)
+	}
+	return
+}
+
+// sendAll 向全部成员(除了自己)发送数据
+func (h *Hub) sendAll(message []byte, ignoreClient *Client) {
+	clients := h.GetUserClients()
+	for _, conn := range clients {
+		if conn != ignoreClient {
+			conn.SendMsg(message)
+		}
+	}
+}
+
+// sendAppIDAll 向全部成员(除了自己)发送数据
+func (h *Hub) sendAppIDAll(message []byte, appID uint32, ignoreClient *Client) {
+	clients := h.GetUserClients()
+	for _, conn := range clients {
+		if conn != ignoreClient && conn.AppID == appID {
+			conn.SendMsg(message)
+		}
+	}
+}
+
 func (c *Client) WritePump() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -264,4 +364,56 @@ func (c *Client) ReadPump() {
 		}
 		c.Send <- message
 	}
+}
+
+// SendMsg 发送数据
+func (c *Client) SendMsg(msg []byte) {
+	if c == nil {
+		return
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("SendMsg stop:", r, string(debug.Stack()))
+		}
+	}()
+	c.Send <- msg
+}
+
+// close 关闭客户端连接
+func (c *Client) close() {
+	close(c.Send)
+}
+
+// Login 用户登录
+func (c *Client) Login(appID uint32, userID string, loginTime uint64) {
+	c.AppID = appID
+	c.UserID = userID
+	c.LoginTime = loginTime
+	// 登录成功=心跳一次
+	c.Heartbeat(loginTime)
+}
+
+// Heartbeat 用户心跳
+func (c *Client) Heartbeat(currentTime uint64) {
+	c.HeartbeatTime = currentTime
+
+	return
+}
+
+// IsHeartbeatTimeout 心跳超时
+func (c *Client) IsHeartbeatTimeout(currentTime uint64) (timeout bool) {
+	if c.HeartbeatTime+heartbeatExpirationTime <= currentTime {
+		timeout = true
+	}
+	return
+}
+
+// IsLogin 是否登录了
+func (c *Client) IsLogin() (isLogin bool) {
+	// 用户登录了
+	if c.UserID != "" {
+		isLogin = true
+		return
+	}
+	return
 }
