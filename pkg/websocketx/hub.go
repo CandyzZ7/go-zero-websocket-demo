@@ -194,7 +194,7 @@ func (h *Hub) GetClientsLen() (clientsLen int) {
 func (h *Hub) GetUserClient(appID string, userID string) (client *Client) {
 	h.UserLock.RLock()
 	defer h.UserLock.RUnlock()
-	userKey := rediskey.RedisKey(rediskey.WebSocketKey.WithParams(client.AppID)).WithSymbol(client.UserID)
+	userKey := rediskey.RedisKey(rediskey.WebSocketKey.WithParams(appID)).WithSymbol(userID)
 	if value, ok := h.Users[userKey]; ok {
 		client = value
 	}
