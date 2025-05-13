@@ -1,6 +1,7 @@
 package svc
 
 import (
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"go-zero-websocket-demo/internal/config"
 	"go-zero-websocket-demo/pkg/websocketx"
 )
@@ -8,16 +9,17 @@ import (
 type ServiceContext struct {
 	Config config.Config
 	WSHub  *websocketx.Hub
-	// 其他服务...
+	RDB    *redis.Redis
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
+	rdb := redis.MustNewRedis(c.RedisConf)
 	wsHub := websocketx.NewHub()
 	go wsHub.Run()
 
 	return &ServiceContext{
 		Config: c,
 		WSHub:  wsHub,
-		// 初始化其他服务...
+		RDB:    rdb,
 	}
 }

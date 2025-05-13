@@ -10,3 +10,7 @@ Log:
   Path: "logs"
   Level: "info"
   Stat: false
+
+RedisConf:
+  Host: "127.0.0.1:6379"
+  Pass: "123456"
