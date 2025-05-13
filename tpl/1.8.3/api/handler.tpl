@@ -34,7 +34,7 @@ func {{.HandlerName}}(svcCtx *svc.ServiceContext) http.HandlerFunc {
         		}
         	}()
         	defer func() {
-        		logx.Info("client %s disconnected", client.Addr)
+        		logx.Infof("client %s disconnected", client.Addr)
         		close(c.Send)
         	}()
 			for {
