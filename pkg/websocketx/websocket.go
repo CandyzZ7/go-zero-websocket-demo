@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	writeWait               = 10 * time.Second
 	pongWait                = 60 * time.Second
 	pingPeriod              = (pongWait * 9) / 10
 	heartbeatExpirationTime = 6 * 60
@@ -331,14 +332,27 @@ func (c *Client) WritePump() {
 	for {
 		select {
 		case message, ok := <-c.Send:
-			if !ok {
-				// 发送数据错误 关闭连接
-				fmt.Println("Client发送数据 关闭连接", c.Addr, "ok", ok)
+			err := c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok || err != nil {
+				_ = c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-			err := c.Conn.WriteMessage(websocket.TextMessage, message)
+
+			w, err := c.Conn.NextWriter(websocket.TextMessage)
 			if err != nil {
-				logx.Errorf("Error writing message: %v", err)
+				return
+			}
+			_, _ = w.Write(message)
+
+			if err := w.Close(); err != nil {
+				return
+			}
+		case <-ticker.C:
+			if err := c.Conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
+				return
+			}
+			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
 			}
 		}
 	}

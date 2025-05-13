@@ -1,6 +1,12 @@
 Name: app
 Host: 0.0.0.0
 Port: 8888
+Verbose: true
 
-WebSocket:
-  Path: "/ws"
+Log:
+  ServiceName: "websocket_demo"
+  Mode: "console"
+  Encoding: "plain"
+  Path: "logs"
+  Level: "info"
+  Stat: false

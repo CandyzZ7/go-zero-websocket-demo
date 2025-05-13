@@ -36,6 +36,7 @@ func {{.HandlerName}}(svcCtx *svc.ServiceContext) http.HandlerFunc {
 					}
 					break
 				}
+				logc.Infof(r.Context(), "Received message: %s", message)
                 {{if .HasRequest}}var req types.{{.RequestType}}
                 err = json.Unmarshal(message, &req)
                 if err != nil {
@@ -43,7 +44,7 @@ func {{.HandlerName}}(svcCtx *svc.ServiceContext) http.HandlerFunc {
                     return
                 }
 
-                {{end}}l := {{.LogicName}}.New{{.LogicType}}(r.Context(), svcCtx)
+                {{end}}l := {{.LogicName}}.New{{.LogicType}}(r.Context(), svcCtx, client)
                 {{if .HasResp}}resp, {{end}}err := l.{{.Call}}({{if .HasRequest}}&req{{end}})
 			    if err != nil {
 				    logc.Error(r.Context(), err)

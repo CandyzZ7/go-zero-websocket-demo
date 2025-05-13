@@ -40,6 +40,7 @@ func PingHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 					}
 					break
 				}
+				logc.Infof(r.Context(), "Received message: %s", message)
 				var req types.PingReq
 				err = json.Unmarshal(message, &req)
 				if err != nil {
@@ -47,7 +48,7 @@ func PingHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 					return
 				}
 
-				l := test.NewPingLogic(r.Context(), svcCtx)
+				l := test.NewPingLogic(r.Context(), svcCtx, client)
 				resp, err := l.Ping(&req)
 				if err != nil {
 					logc.Error(r.Context(), err)
