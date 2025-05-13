@@ -148,7 +148,6 @@ func (h *Hub) DelClients(client *Client) {
 	h.ClientsLock.Lock()
 	defer h.ClientsLock.Unlock()
 	if _, ok := h.Clients[client]; ok {
-		close(client.Send)
 		err := client.Conn.Close()
 		if err != nil {
 			logx.Errorf("close client error: %v", err)
@@ -181,7 +180,7 @@ func (h *Hub) EventLogin(login *login) {
 		userKey := login.GetKey()
 		h.AddUsers(userKey, login.Client)
 	}
-	logx.Info("EventLogin 用户登录", client.Addr, login.AppID, login.UserID)
+	logx.Info("user login", login.AppID, login.UserID, client.Addr)
 }
 
 // AddUsers 添加用户
@@ -321,7 +320,7 @@ func (h *Hub) sendAppIDAll(message []byte, appID uint32, ignoreClient *Client) {
 func (c *Client) WritePump() {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("write stop", string(debug.Stack()), r)
+			logx.Info("write stop", string(debug.Stack()), r)
 		}
 	}()
 	ticker := time.NewTicker(pingPeriod)
@@ -361,18 +360,18 @@ func (c *Client) WritePump() {
 func (c *Client) ReadPump() {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("write stop", string(debug.Stack()), r)
+			logx.Info("write stop", string(debug.Stack()), r)
 		}
 	}()
 	defer func() {
-		fmt.Println("读取客户端数据 关闭send", c)
+		logx.Info("client %s disconnected", c.Addr)
 		close(c.Send)
 	}()
 	for {
 		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				logx.Errorf("Error reading message: %v", err)
+				logx.Infof("websocket was closed unexpectedly: %v", err)
 			}
 			break
 		}
@@ -387,7 +386,7 @@ func (c *Client) SendMsg(msg []byte) {
 	}
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("SendMsg stop:", r, string(debug.Stack()))
+			fmt.Println("sendMsg stop:", r, string(debug.Stack()))
 		}
 	}()
 	c.Send <- msg

@@ -2,7 +2,9 @@ package test
 
 import (
 	"encoding/json"
+	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -20,7 +22,7 @@ func PingHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := websocketx.Upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			logc.Errorf(r.Context(), "Error upgrading to WebSocket: %v", err)
+			logc.Errorf(r.Context(), "error upgrading to WebSocket: %v", err)
 			return
 		}
 
@@ -32,15 +34,24 @@ func PingHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		go c.WritePump()
 
 		go func(client *websocketx.Client) {
+			defer func() {
+				if r := recover(); r != nil {
+					logx.Info("write stop", string(debug.Stack()), r)
+				}
+			}()
+			defer func() {
+				logx.Info("client %s disconnected", client.Addr)
+				close(c.Send)
+			}()
 			for {
 				_, message, err := conn.ReadMessage()
 				if err != nil {
 					if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-						logc.Errorf(r.Context(), "Error reading message: %v", err)
+						logx.Infof("websocket was closed unexpectedly: %v", err)
 					}
 					break
 				}
-				logc.Infof(r.Context(), "Received message: %s", message)
+				logc.Infof(r.Context(), "received message: %s", message)
 				var req types.PingReq
 				err = json.Unmarshal(message, &req)
 				if err != nil {
