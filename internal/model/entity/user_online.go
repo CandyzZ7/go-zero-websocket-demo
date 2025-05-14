@@ -1,5 +1,14 @@
 package entity
 
+import (
+	"github.com/zeromicro/go-zero/core/logx"
+	"time"
+)
+
+const (
+	heartbeatTimeout = 3 * 60 // 用户心跳超时时间
+)
+
 type UserOnline struct {
 	AccIp         string `json:"accIp"`         // acc Ip
 	AccPort       string `json:"accPort"`       // acc 端口
@@ -13,4 +22,51 @@ type UserOnline struct {
 	Qua           string `json:"qua"`           // qua
 	DeviceInfo    string `json:"deviceInfo"`    // 设备信息
 	IsLogoff      bool   `json:"isLogoff"`      // 是否下线
+}
+
+// Heartbeat 用户心跳
+func (m *UserOnline) Heartbeat(currentTime uint64) {
+	m.HeartbeatTime = currentTime
+	m.IsLogoff = false
+}
+
+func (m *UserOnline) Login(accIp, accPort string, appID uint32, userID string, addr string, loginTime uint64) {
+	m.AccIp = accIp
+	m.AccPort = accPort
+	m.AppID = appID
+	m.UserID = userID
+	m.ClientIp = addr
+	m.ClientPort = addr
+	m.LoginTime = loginTime
+	m.HeartbeatTime = loginTime
+	m.IsLogoff = false
+}
+
+func (m *UserOnline) Logout() {
+	m.LogOutTime = uint64(time.Now().Unix())
+	m.IsLogoff = true
+}
+
+// IsOnline 判断用户是否在线
+func (m *UserOnline) IsOnline() bool {
+	if m.IsLogoff {
+		return false
+	}
+	currentTime := uint64(time.Now().Unix())
+	if m.HeartbeatTime < (currentTime - heartbeatTimeout) {
+		logx.Infof("user heartbeat timeout, appID: %d, userID: %s, heartbeatTime: %d", m.AppID, m.UserID, m.HeartbeatTime)
+		return false
+	}
+	if m.IsLogoff {
+		logx.Infof("user is logoff, appID: %d, userID: %s", m.AppID, m.UserID)
+		return false
+	}
+	return true
+}
+
+func (m *UserOnline) UserIsLocal(localIp, localPort string) (result bool) {
+	if m.AccIp == localIp && m.AccPort == localPort {
+		return true
+	}
+	return false
 }

@@ -21,6 +21,17 @@ type Hub struct {
 	Login       chan *Client // 用户登录处理
 }
 
+type HubInfo struct {
+	ClientsLen        int      `json:"clientsLen"`        // 客户端连接数
+	UsersLen          int      `json:"usersLen"`          // 登录用户数
+	ChanRegisterLen   int      `json:"chanRegisterLen"`   // 未处理连接事件数
+	ChanLoginLen      int      `json:"chanLoginLen"`      // 未处理登录事件数
+	ChanUnregisterLen int      `json:"chanUnregisterLen"` // 未处理退出登录事件数
+	ChanBroadcastLen  int      `json:"chanBroadcastLen"`  // 未处理广播事件数
+	ClientAddrList    []string `json:"clientAddrList"`    // 客户端列表
+	UserList          []string `json:"userList"`          // 登录用户列表
+}
+
 func NewHub() *Hub {
 	return &Hub{
 		Clients:    make(map[*Client]bool),
@@ -45,6 +56,7 @@ func (h *Hub) Run() {
 			// 用户登录
 			h.EventLogin(l)
 		case message := <-h.Broadcast:
+			// 广播消息
 			h.SendMessage(message)
 		}
 	}
@@ -62,43 +74,48 @@ func (h *Hub) EventLogin(client *Client) {
 
 // EventUnregister 用户断开连接
 func (h *Hub) EventUnregister(client *Client) {
-	h.DelClients(client)
+	h.DelClientList(client)
 
 	// 删除用户连接
-	deleteResult := h.DelUsers(client)
+	deleteResult := h.DelUserList(client)
 	if deleteResult == false {
 		// 不是当前连接的客户端
 		return
 	}
 
-	// 清除redis登录数据
+	// 获取用户登录信息
 	userOnlineEntity, err := repository.GetUserOnlineByAppIDAndUserID(context.Background(), client.AppID, client.UserID)
 	if err != nil {
 		logx.Error(err)
 	}
-	userOnlineEntity.LogOutTime = uint64(time.Now().Unix())
-	userOnlineEntity.IsLogoff = true
+
+	// 更新用户在线状态
+	userOnlineEntity.Logout()
+
+	// 更新用户在线状态
 	err = repository.UpdateUserOnline(context.Background(), userOnlineEntity)
 	if err != nil {
 		logx.Error(err)
 	}
+
 	logx.Infof("client disconnect, addr: %s, appID: %s, userID: %s", client.Addr, client.AppID, client.UserID)
 }
 
 // EventRegister 用户建立连接事件
 func (h *Hub) EventRegister(client *Client) {
-	h.AddClients(client)
+	h.AddClientList(client)
+	logx.Infof("client register, addr: %s, appID: %s, userID: %s", client.Addr, client.AppID, client.UserID)
 }
 
-// AddClients 添加客户端
-func (h *Hub) AddClients(client *Client) {
+// AddClientList 添加客户端
+func (h *Hub) AddClientList(client *Client) {
 	h.ClientsLock.Lock()
 	defer h.ClientsLock.Unlock()
 	h.Clients[client] = true
 }
 
-// DelClients 删除客户端
-func (h *Hub) DelClients(client *Client) {
+// DelClientList 删除客户端
+func (h *Hub) DelClientList(client *Client) {
 	h.ClientsLock.Lock()
 	defer h.ClientsLock.Unlock()
 	if _, ok := h.Clients[client]; ok {
@@ -110,8 +127,8 @@ func (h *Hub) DelClients(client *Client) {
 	}
 }
 
-// DelUsers 删除用户
-func (h *Hub) DelUsers(client *Client) (result bool) {
+// DelUserList 删除用户
+func (h *Hub) DelUserList(client *Client) (result bool) {
 	h.UserLock.Lock()
 	defer h.UserLock.Unlock()
 	userKey := rediskey.RedisKey(rediskey.WebSocketKey.WithParams(client.AppID)).WithSymbol(client.UserID)
@@ -161,18 +178,18 @@ func (h *Hub) SendMessage(message []byte) {
 	}
 }
 
-// GetClients 获取所有客户端
-func (h *Hub) GetClients() (clients map[*Client]bool) {
+// GetClientList 获取所有客户端
+func (h *Hub) GetClientList() (clients map[*Client]bool) {
 	clients = make(map[*Client]bool)
-	h.ClientsRange(func(client *Client, value bool) (result bool) {
+	h.ClientListRange(func(client *Client, value bool) (result bool) {
 		clients[client] = value
 		return true
 	})
 	return
 }
 
-// ClientsRange 遍历
-func (h *Hub) ClientsRange(f func(client *Client, value bool) (result bool)) {
+// ClientListRange 遍历
+func (h *Hub) ClientListRange(f func(client *Client, value bool) (result bool)) {
 	h.ClientsLock.RLock()
 	defer h.ClientsLock.RUnlock()
 	for key, value := range h.Clients {
@@ -181,6 +198,26 @@ func (h *Hub) ClientsRange(f func(client *Client, value bool) (result bool)) {
 			return
 		}
 	}
+	return
+}
+
+// GetClientAddrList 获取客户端地址列表
+func (h *Hub) GetClientAddrList() (clientAddrList []string) {
+	clientAddrList = make([]string, 0)
+	h.ClientListRange(func(client *Client, value bool) (result bool) {
+		clientAddrList = append(clientAddrList, client.Addr)
+		return true
+	})
+	return
+}
+
+// GetAllClientList 获取客户端列表
+func (h *Hub) GetAllClientList() (clientList []*Client) {
+	clientList = make([]*Client, 0)
+	h.ClientListRange(func(client *Client, value bool) (result bool) {
+		clientList = append(clientList, client)
+		return true
+	})
 	return
 }
 
@@ -207,8 +244,8 @@ func (h *Hub) GetUsersLen() (userLen int) {
 	return
 }
 
-// GetUserKeys 获取用户的key
-func (h *Hub) GetUserKeys() (userKeys []string) {
+// GetUserKeyList 获取用户的key
+func (h *Hub) GetUserKeyList() (userKeys []string) {
 	userKeys = make([]string, 0, len(h.Users))
 	for key := range h.Users {
 		userKeys = append(userKeys, key)
@@ -229,8 +266,8 @@ func (h *Hub) GetUserList(appID string) (userList []string) {
 	return
 }
 
-// GetUserClients 获取用户的key
-func (h *Hub) GetUserClients() (clients []*Client) {
+// GetUserClientList 获取用户的key
+func (h *Hub) GetUserClientList() (clients []*Client) {
 	clients = make([]*Client, 0)
 	h.UserLock.RLock()
 	defer h.UserLock.RUnlock()
@@ -242,7 +279,7 @@ func (h *Hub) GetUserClients() (clients []*Client) {
 
 // sendAll 向全部成员(除了自己)发送数据
 func (h *Hub) sendAll(message []byte, ignoreClient *Client) {
-	clients := h.GetUserClients()
+	clients := h.GetUserClientList()
 	for _, conn := range clients {
 		if conn != ignoreClient {
 			conn.SendMsg(message)
@@ -252,10 +289,56 @@ func (h *Hub) sendAll(message []byte, ignoreClient *Client) {
 
 // sendAppIDAll 向全部成员(除了自己)发送数据
 func (h *Hub) sendAppIDAll(message []byte, appID string, ignoreClient *Client) {
-	clients := h.GetUserClients()
+	clients := h.GetUserClientList()
 	for _, conn := range clients {
 		if conn != ignoreClient && conn.AppID == appID {
 			conn.SendMsg(message)
 		}
 	}
+}
+
+// GetHubInfo 获取管理者信息
+func (h *Hub) GetHubInfo() *HubInfo {
+	clientsLen := h.GetClientsLen()        // 客户端连接数
+	usersLen := h.GetUsersLen()            // 登录用户数
+	chanRegisterLen := len(h.Register)     // 未处理连接事件数
+	chanLoginLen := len(h.Login)           // 未处理登录事件数
+	chanUnregisterLen := len(h.Unregister) // 未处理退出登录事件数
+	chanBroadcastLen := len(h.Broadcast)   // 未处理广播事件数
+	clientAddrList := make([]string, 0)
+	h.ClientListRange(func(client *Client, value bool) (result bool) {
+		clientAddrList = append(clientAddrList, client.Addr)
+		return true
+	})
+	userList := h.GetUserKeyList()
+
+	return &HubInfo{
+		ClientsLen:        clientsLen,
+		UsersLen:          usersLen,
+		ChanRegisterLen:   chanRegisterLen,
+		ChanLoginLen:      chanLoginLen,
+		ChanUnregisterLen: chanUnregisterLen,
+		ChanBroadcastLen:  chanBroadcastLen,
+		ClientAddrList:    clientAddrList,
+		UserList:          userList,
+	}
+}
+
+// ClearTimeoutConnections 定时清理超时连接
+func (h *Hub) ClearTimeoutConnections() {
+	currentTime := uint64(time.Now().Unix())
+	clients := h.GetClientList()
+	for client := range clients {
+		if client.IsHeartbeatTimeout(currentTime) {
+			logx.Infof("heartbeat timeout, close connection, addr: %s, appID: %s,  loginTime: %d, heartbeatTime: %d", client.Addr, client.UserID, client.LoginTime, client.HeartbeatTime)
+			_ = client.Conn.Close()
+		}
+	}
+}
+
+// AllSendMessages 全员广播
+func (h *Hub) AllSendMessages(appID string, userID string, data string) {
+	logx.Infof("all send message, appID: %s, userID: %s, data: %s", appID, userID, data)
+	ignoreClient := h.GetUserClient(appID, userID)
+	h.sendAppIDAll([]byte(data), appID, ignoreClient)
 }

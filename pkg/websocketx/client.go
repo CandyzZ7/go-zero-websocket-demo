@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
+	"go-zero-websocket-demo/pkg/rediskey"
 	"runtime/debug"
 	"sync"
 	"time"
@@ -34,6 +35,7 @@ func NewClient(h *Hub, addr string, conn *websocket.Conn, firstTime uint64) (cli
 	}
 	return
 }
+
 func (c *Client) WritePump() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -94,6 +96,10 @@ func (c *Client) ReadPump() {
 		}
 		c.Send <- message
 	}
+}
+
+func (c *Client) GetUserKey() string {
+	return rediskey.RedisKey(rediskey.WebSocketKey.WithParams(c.AppID)).WithSymbol(c.UserID)
 }
 
 // SendMsg 发送数据
