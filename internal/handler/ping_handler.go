@@ -1,24 +1,25 @@
-package test
+package handler
 
 import (
 	"encoding/json"
-	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
 	"runtime/debug"
 	"time"
 
+	"github.com/zeromicro/go-zero/core/logx"
+
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"go-zero-websocket-demo/internal/logic/test"
+
+	"go-zero-websocket-demo/internal/logic"
 	"go-zero-websocket-demo/internal/svc"
 	"go-zero-websocket-demo/internal/types"
 
 	"go-zero-websocket-demo/pkg/websocketx"
 )
 
-// ping
-func PingHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func WsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := websocketx.Upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -59,7 +60,7 @@ func PingHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 					return
 				}
 
-				l := test.NewPingLogic(r.Context(), svcCtx, client)
+				l := logic.NewPingLogic(r.Context(), svcCtx, client)
 				resp, err := l.Ping(&req)
 				if err != nil {
 					logc.Error(r.Context(), err)

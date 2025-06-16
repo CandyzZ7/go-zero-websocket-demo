@@ -1,7 +1,8 @@
-package test
+package logic
 
 import (
 	"context"
+
 	"go-zero-websocket-demo/pkg/websocketx"
 
 	"github.com/zeromicro/go-zero/core/logx"

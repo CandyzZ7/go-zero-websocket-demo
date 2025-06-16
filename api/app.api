@@ -1,10 +1,10 @@
 syntax = "v1"
 
-type PingReq {
+type WsReq {
 	Msg string `json:"msg"`
 }
 
-type PingResp {
+type WsResp {
 	Msg string `json:"msg"`
 }
 
@@ -12,8 +12,8 @@ type PingResp {
 	group: test
 )
 service app {
-	@doc "ping"
-	@handler Ping
-	get /ping (PingReq) returns (PingResp)
+	@doc "ws"
+	@handler Ws
+	get /ws (WsReq) returns (WsResp)
 }
 
