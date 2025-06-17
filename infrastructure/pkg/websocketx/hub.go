@@ -8,7 +8,7 @@ import (
 
 	"github.com/zeromicro/go-zero/core/logx"
 
-	"go-zero-websocket-demo/infrastructure/pkg/rediskey"
+	"go-zero-websocket-demo/common/rediskey"
 	"go-zero-websocket-demo/internal/repository"
 )
 
@@ -66,16 +66,17 @@ func (h *Hub) Run() {
 
 // EventLogin 用户登录
 func (h *Hub) EventLogin(client *Client) {
+	logx.Infof("client login, addr: %s, appID: %s, userID: %s", client.Addr, client.AppID, client.UserID)
 	// 连接存在，在添加
 	if h.InClient(client) {
 		userKey := rediskey.RedisKey(rediskey.WebSocketKey.WithParams(client.AppID)).WithSymbol(client.UserID)
 		h.AddUsers(userKey, client)
 	}
-	logx.Infof("client login, addr: %s, appID: %s, userID: %s", client.Addr, client.AppID, client.UserID)
 }
 
 // EventUnregister 用户断开连接
 func (h *Hub) EventUnregister(client *Client) {
+	logx.Infof("client disconnect, addr: %s, appID: %s, userID: %s", client.Addr, client.AppID, client.UserID)
 	h.DelClientList(client)
 
 	// 删除用户连接
@@ -99,8 +100,6 @@ func (h *Hub) EventUnregister(client *Client) {
 	if err != nil {
 		logx.Error(err)
 	}
-
-	logx.Infof("client disconnect, addr: %s, appID: %s, userID: %s", client.Addr, client.AppID, client.UserID)
 }
 
 // EventRegister 用户建立连接事件

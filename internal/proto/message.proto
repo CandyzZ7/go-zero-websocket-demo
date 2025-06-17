@@ -17,7 +17,7 @@ message MessageResponse{
 }
 
 message Response{
-  uint32 code = 1;
+  int32 code = 1;
   string msg = 2;
   bytes data = 3;
 }

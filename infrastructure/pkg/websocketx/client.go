@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
 
-	"go-zero-websocket-demo/infrastructure/pkg/rediskey"
+	"go-zero-websocket-demo/common/rediskey"
 	"go-zero-websocket-demo/internal/config"
 )
 
@@ -87,7 +87,7 @@ func (c *Client) ReadPump(ctx context.Context, msgType string) {
 		}
 	}()
 	defer func() {
-		logx.Info("client %s disconnected", c.Addr)
+		logx.Infof("client %s disconnected", c.Addr)
 		close(c.Send)
 	}()
 	for {

@@ -143,7 +143,7 @@ func (x *MessageResponse) GetResponse() *Response {
 
 type Response struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          uint32                 `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
 	Msg           string                 `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
 	Data          []byte                 `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -180,7 +180,7 @@ func (*Response) Descriptor() ([]byte, []int) {
 	return file_internal_proto_message_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Response) GetCode() uint32 {
+func (x *Response) GetCode() int32 {
 	if x != nil {
 		return x.Code
 	}
@@ -215,7 +215,7 @@ const file_internal_proto_message_proto_rawDesc = "" +
 	"\x03cmd\x18\x02 \x01(\tR\x03cmd\x12(\n" +
 	"\bresponse\x18\x03 \x01(\v2\f.pb.ResponseR\bresponse\"D\n" +
 	"\bResponse\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\rR\x04code\x12\x10\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x10\n" +
 	"\x03msg\x18\x02 \x01(\tR\x03msg\x12\x12\n" +
 	"\x04data\x18\x03 \x01(\fR\x04dataB\x06Z\x04./pbb\x06proto3"
 

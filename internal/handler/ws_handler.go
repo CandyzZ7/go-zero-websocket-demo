@@ -25,7 +25,9 @@ func WsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		h.Register <- c
 		WebsocketInit(r.Context(), svcCtx, c)
 		if svcCtx.Config.Mode == service.DevMode || svcCtx.Config.Mode == service.TestMode {
-			svcCtx.Config.MsgType = r.Header.Get("X-Content-MsgType")
+			if r.Header.Get("X-Content-MsgType") != "" {
+				svcCtx.Config.MsgType = r.Header.Get("X-Content-MsgType")
+			}
 		}
 
 		go c.WritePump(r.Context())

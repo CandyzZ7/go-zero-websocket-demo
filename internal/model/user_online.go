@@ -1,4 +1,4 @@
-package entity
+package model
 
 import (
 	"time"
@@ -13,7 +13,7 @@ const (
 type UserOnline struct {
 	AccIp         string `json:"accIp"`         // acc Ip
 	AccPort       string `json:"accPort"`       // acc 端口
-	AppID         uint32 `json:"appID"`         // appID
+	AppID         string `json:"appID"`         // appID
 	UserID        string `json:"userID"`        // 用户ID
 	ClientIp      string `json:"clientIp"`      // 客户端Ip
 	ClientPort    string `json:"clientPort"`    // 客户端端口
@@ -31,7 +31,7 @@ func (m *UserOnline) Heartbeat(currentTime uint64) {
 	m.IsLogoff = false
 }
 
-func (m *UserOnline) Login(accIp, accPort string, appID uint32, userID string, addr string, loginTime uint64) {
+func (m *UserOnline) Login(accIp, accPort string, appID string, userID string, addr string, loginTime uint64) {
 	m.AccIp = accIp
 	m.AccPort = accPort
 	m.AppID = appID

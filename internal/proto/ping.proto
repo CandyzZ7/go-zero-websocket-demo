@@ -11,3 +11,12 @@ message PingReq {
 message PingResp {
   string msg = 1;
 }
+
+message HeartbeatReq {
+  string user_id = 1;
+}
+
+message HeartbeatResp {
+
+}
+

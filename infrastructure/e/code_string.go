@@ -11,26 +11,30 @@ func _() {
 	_ = x[OKCode-0]
 	_ = x[BadRequestCode - -1]
 	_ = x[SystemErrorCode - -2]
-	_ = x[ParseErrorCode - -3]
+	_ = x[ParseErrorCode-1]
+	_ = x[NotLoggedInCode-1000]
 	_ = x[NotFoundRouteCode-4001]
 }
 
 const (
-	_Code_name_0 = "Parse ErrorSystem ErrorServer ErrorOK"
-	_Code_name_1 = "Not Found Route"
+	_Code_name_0 = "System ErrorServer ErrorOKParse Error"
+	_Code_name_1 = "Not Logged In"
+	_Code_name_2 = "Not Found Route"
 )
 
 var (
-	_Code_index_0 = [...]uint8{0, 11, 23, 35, 37}
+	_Code_index_0 = [...]uint8{0, 12, 24, 26, 37}
 )
 
 func (i Code) String() string {
 	switch {
-	case -3 <= i && i <= 0:
-		i -= -3
+	case -2 <= i && i <= 1:
+		i -= -2
 		return _Code_name_0[_Code_index_0[i]:_Code_index_0[i+1]]
-	case i == 4001:
+	case i == 1000:
 		return _Code_name_1
+	case i == 4001:
+		return _Code_name_2
 	default:
 		return "Code(" + strconv.FormatInt(int64(i), 10) + ")"
 	}

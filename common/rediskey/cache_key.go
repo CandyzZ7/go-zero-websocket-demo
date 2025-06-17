@@ -4,6 +4,10 @@ type RedisKey string
 
 const WebSocketKey RedisKey = "websocket"
 
+const (
+	UserOnline RedisKey = "user_online"
+)
+
 func (key RedisKey) WithSymbol(symbol string) string {
 	return string(key) + "_" + symbol
 }

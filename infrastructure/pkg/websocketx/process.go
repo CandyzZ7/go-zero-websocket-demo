@@ -82,7 +82,7 @@ func NewProtoMessageResponse(seq string, cmd string, code *e.StatusCode, data []
 
 // NewProtoResponse 创建新的响应
 func NewProtoResponse(code *e.StatusCode, data []byte) *pb.Response {
-	return &pb.Response{Code: uint32(code.Code), Msg: code.Message, Data: data}
+	return &pb.Response{Code: int32(code.Code), Msg: code.Message, Data: data}
 }
 
 // String to string
@@ -228,11 +228,11 @@ func parseRequest(ctx context.Context, msgType string, message []byte) (*Request
 	case "json":
 		request := &Request{}
 		if err = json.Unmarshal(message, request); err != nil {
-			logc.Error(ctx, "json Unmarshal", err)
+			logc.Error(ctx, "json Unmarshal ", err)
 			return nil, err
 		}
 		if data, err = json.Marshal(request.Data); err != nil {
-			logc.Error(ctx, "json Marshal", err)
+			logc.Error(ctx, "json Marshal ", err)
 			return nil, err
 		}
 		seq, cmd = request.Seq, request.Cmd
@@ -240,7 +240,7 @@ func parseRequest(ctx context.Context, msgType string, message []byte) (*Request
 	case "proto":
 		request := &pb.MessageRequest{}
 		if err = proto.Unmarshal(message, request); err != nil {
-			logc.Error(ctx, "proto Unmarshal", err)
+			logc.Error(ctx, "proto Unmarshal ", err)
 			return nil, err
 		}
 		seq, cmd, data = request.Seq, request.Cmd, request.Data

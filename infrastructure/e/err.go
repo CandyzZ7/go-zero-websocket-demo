@@ -8,5 +8,9 @@ var (
 )
 
 var (
+	NotLoggedIn = newStatusCode(NotLoggedInCode, NotLoggedInCode.String())
+)
+
+var (
 	NotFoundRoute = newStatusCode(NotFoundRouteCode, NotFoundRouteCode.String())
 )

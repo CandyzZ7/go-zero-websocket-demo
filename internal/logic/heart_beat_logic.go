@@ -3,25 +3,25 @@ package logic
 import (
 	"context"
 
-	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/logx"
 
+	"go-zero-websocket-demo/infrastructure/e"
 	"go-zero-websocket-demo/infrastructure/pkg/serializex"
 	"go-zero-websocket-demo/infrastructure/pkg/websocketx"
 	"go-zero-websocket-demo/internal/pb"
 	"go-zero-websocket-demo/internal/svc"
 )
 
-type PingLogic struct {
+type HeartbeatLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	client *websocketx.Client
 }
 
-// ping
-func NewPingLogic(ctx context.Context, svcCtx *svc.ServiceContext, client *websocketx.Client) *PingLogic {
-	return &PingLogic{
+// Heartbeat
+func NewHeartbeatLogic(ctx context.Context, svcCtx *svc.ServiceContext, client *websocketx.Client) *HeartbeatLogic {
+	return &HeartbeatLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
@@ -29,14 +29,14 @@ func NewPingLogic(ctx context.Context, svcCtx *svc.ServiceContext, client *webso
 	}
 }
 
-func (l *PingLogic) Ping(seq string, message []byte) (data []byte, err error) {
-	var req *pb.PingReq
+func (l *HeartbeatLogic) Heartbeat(seq string, message []byte) (data []byte, err error) {
+	var req *pb.HeartbeatReq
 	err = serializex.Unmarshal(l.svcCtx.Config.MsgType, message, &req)
 	if err != nil {
 		return nil, err
 	}
-	logc.Infof(l.ctx, "Received ping request: %v", req)
-	resp, err := l.ping(req)
+
+	resp, err := l.heartbeat(req)
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +44,10 @@ func (l *PingLogic) Ping(seq string, message []byte) (data []byte, err error) {
 	return serializex.Marshal(l.svcCtx.Config.MsgType, resp)
 }
 
-func (l *PingLogic) ping(req *pb.PingReq) (*pb.PingResp, error) {
-	return &pb.PingResp{
-		Msg: "test" + req.Msg,
-	}, nil
+func (l *HeartbeatLogic) heartbeat(req *pb.HeartbeatReq) (*pb.HeartbeatResp, error) {
+	if l.client.IsLogin() {
+		return nil, e.NotLoggedIn
+	}
+
+	return &pb.HeartbeatResp{}, nil
 }
