@@ -28,7 +28,7 @@ func main() {
 	go wsHub.Run()
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
-	handler.WebsocketInit(context.Background(), ctx)
+	handler.WebsocketInit()
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()
 }
