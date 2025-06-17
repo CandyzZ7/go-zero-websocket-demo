@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb";
+
+message PingReq {
+  string msg = 1;
+}
+
+message PingResp {
+  string msg = 1;
+}

@@ -1,4 +1,3 @@
-.PHONY: api
-# generate api proto
-api:
-	goctl api go -api ./api/app.api -dir . -style go_zero -home=./tpl
+.PHONY: proto
+proto:
+	protoc --go_out=./internal  --go-grpc_out=. ./internal/proto/*.proto

@@ -8,4 +8,5 @@ import (
 type Config struct {
 	rest.RestConf
 	RedisConf redis.RedisConf
+	MsgType   string
 }

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb";
+
+message MessageRequest{
+  string seq = 1;
+  string cmd = 2;
+  bytes data = 3;
+}
+
+message MessageResponse{
+  string seq = 1;
+  string cmd = 2;
+  Response response = 3;
+}
+
+message Response{
+  uint32 code = 1;
+  string msg = 2;
+  bytes data = 3;
+}

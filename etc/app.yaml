@@ -2,6 +2,7 @@ Name: app
 Host: 0.0.0.0
 Port: 8888
 Verbose: true
+Mode: dev
 
 Log:
   ServiceName: "websocket_demo"
@@ -14,3 +15,12 @@ Log:
 RedisConf:
   Host: "127.0.0.1:6379"
   Pass: "123456"
+
+MsgType: "proto"
+
+Signature:
+  Strict: false                   # 是否开启校验，调试的时候可以关掉，默认是关闭
+  Expiry: 1h										 # 签名字段的过期时间，默认 1 h
+  PrivateKeys:									 # 密钥以及指纹，密钥是上面 RSA 文件位置，指纹自定义，可以多组
+    - Fingerprint: "websocket_demo"
+      KeyFile: D:\work\secret\id_rsa

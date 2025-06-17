@@ -6,9 +6,9 @@ package handler
 import (
 	"net/http"
 
-	"go-zero-websocket-demo/internal/svc"
-
 	"github.com/zeromicro/go-zero/rest"
+
+	"go-zero-websocket-demo/internal/svc"
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
@@ -21,5 +21,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: WsHandler(serverCtx),
 			},
 		},
+		rest.WithSignature(serverCtx.Config.Signature),
 	)
 }

@@ -1,8 +1,9 @@
 package entity
 
 import (
-	"github.com/zeromicro/go-zero/core/logx"
 	"time"
+
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 const (
