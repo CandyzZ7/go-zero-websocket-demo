@@ -36,7 +36,7 @@ func Ping(ctx context.Context, svcCtx *svc.ServiceContext, client *websocketx.Cl
 		return nil, err
 	}
 	logc.Infof(ctx, "Received ping request: %v", req)
-	resp, err := NewPingLogic(ctx, svcCtx, client).ping(req)
+	resp, err := NewPingLogic(ctx, svcCtx, client).Ping(req)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func Ping(ctx context.Context, svcCtx *svc.ServiceContext, client *websocketx.Cl
 	return serializex.Marshal(client.MsgType, resp)
 }
 
-func (l *PingLogic) ping(req *pb.PingReq) (*pb.PingResp, error) {
+func (l *PingLogic) Ping(req *pb.PingReq) (*pb.PingResp, error) {
 	return &pb.PingResp{
 		Msg: "test" + req.Msg,
 	}, nil
