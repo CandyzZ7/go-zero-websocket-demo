@@ -16,22 +16,20 @@ type PingLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
-	client *websocketx.Client
 }
 
 // ping
-func NewPingLogic(ctx context.Context, svcCtx *svc.ServiceContext, client *websocketx.Client) *PingLogic {
+func NewPingLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PingLogic {
 	return &PingLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
-		client: client,
 	}
 }
 
-func (l *PingLogic) Ping(seq string, message []byte) (data []byte, err error) {
-	var req *pb.PingReq
-	err = serializex.Unmarshal(l.svcCtx.Config.MsgType, message, &req)
+func (l *PingLogic) Ping(client *websocketx.Client, seq string, message []byte) (data []byte, err error) {
+	req := &pb.PingReq{}
+	err = serializex.Unmarshal(client.MsgType, message, req)
 	if err != nil {
 		return nil, err
 	}
@@ -40,8 +38,8 @@ func (l *PingLogic) Ping(seq string, message []byte) (data []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
-
-	return serializex.Marshal(l.svcCtx.Config.MsgType, resp)
+	logc.Infof(l.ctx, "Sending ping response: %v", resp)
+	return serializex.Marshal(client.MsgType, resp)
 }
 
 func (l *PingLogic) ping(req *pb.PingReq) (*pb.PingResp, error) {

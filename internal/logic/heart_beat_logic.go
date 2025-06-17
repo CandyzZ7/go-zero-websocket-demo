@@ -30,8 +30,8 @@ func NewHeartbeatLogic(ctx context.Context, svcCtx *svc.ServiceContext, client *
 }
 
 func (l *HeartbeatLogic) Heartbeat(seq string, message []byte) (data []byte, err error) {
-	var req *pb.HeartbeatReq
-	err = serializex.Unmarshal(l.svcCtx.Config.MsgType, message, &req)
+	req := &pb.HeartbeatReq{}
+	err = serializex.Unmarshal(l.client.MsgType, message, req)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (l *HeartbeatLogic) Heartbeat(seq string, message []byte) (data []byte, err
 		return nil, err
 	}
 
-	return serializex.Marshal(l.svcCtx.Config.MsgType, resp)
+	return serializex.Marshal(l.client.MsgType, resp)
 }
 
 func (l *HeartbeatLogic) heartbeat(req *pb.HeartbeatReq) (*pb.HeartbeatResp, error) {

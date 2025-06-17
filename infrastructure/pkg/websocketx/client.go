@@ -11,7 +11,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 
 	"go-zero-websocket-demo/common/rediskey"
-	"go-zero-websocket-demo/internal/config"
 )
 
 type Client struct {
@@ -25,10 +24,11 @@ type Client struct {
 	FirstTime     uint64      // 首次连接事件
 	HeartbeatTime uint64      // 用户上次心跳时间
 	LoginTime     uint64      // 登录时间 登录以后才有
+	MsgType       string
 }
 
 // NewClient 初始化
-func NewClient(h *Hub, addr string, conn *websocket.Conn, firstTime uint64, config config.Config) (client *Client) {
+func NewClient(h *Hub, addr string, conn *websocket.Conn, firstTime uint64, msgType string) (client *Client) {
 	client = &Client{
 		Hub:           h,
 		Addr:          addr,
@@ -36,6 +36,7 @@ func NewClient(h *Hub, addr string, conn *websocket.Conn, firstTime uint64, conf
 		Send:          make(chan []byte, 100),
 		FirstTime:     firstTime,
 		HeartbeatTime: firstTime,
+		MsgType:       msgType,
 	}
 	return
 }
@@ -80,7 +81,7 @@ func (c *Client) WritePump(ctx context.Context) {
 	}
 }
 
-func (c *Client) ReadPump(ctx context.Context, msgType string) {
+func (c *Client) ReadPump(ctx context.Context) {
 	defer func() {
 		if r := recover(); r != nil {
 			logx.Info("write stop", string(debug.Stack()), r)
@@ -98,7 +99,7 @@ func (c *Client) ReadPump(ctx context.Context, msgType string) {
 			}
 			break
 		}
-		ProcessData(ctx, c, message, msgType)
+		ProcessData(ctx, c, message)
 	}
 }
 

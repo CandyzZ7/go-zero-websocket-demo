@@ -10,10 +10,7 @@ const (
 	// BadRequestCode 错误请求
 	BadRequestCode  Code = -1 // Server Error
 	SystemErrorCode Code = -2 // System Error
-)
-
-const (
-	ParseErrorCode Code = 1 // Parse Error
+	ParseErrorCode  Code = -3 // Parse Error
 )
 
 const (

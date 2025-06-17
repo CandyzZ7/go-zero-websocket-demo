@@ -76,7 +76,7 @@ func (h *Hub) EventLogin(client *Client) {
 
 // EventUnregister 用户断开连接
 func (h *Hub) EventUnregister(client *Client) {
-	logx.Infof("client disconnect, addr: %s, appID: %s, userID: %s", client.Addr, client.AppID, client.UserID)
+	logx.Infof("client unregister, addr: %s, appID: %s, userID: %s", client.Addr, client.AppID, client.UserID)
 	h.DelClientList(client)
 
 	// 删除用户连接
