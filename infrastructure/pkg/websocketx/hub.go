@@ -12,6 +12,8 @@ import (
 	"go-zero-websocket-demo/internal/repository"
 )
 
+var hub *Hub
+
 type Hub struct {
 	Clients     map[*Client]bool   // 全部的连接
 	ClientsLock sync.RWMutex       // 读写锁
@@ -35,7 +37,7 @@ type HubInfo struct {
 }
 
 func NewHub() *Hub {
-	return &Hub{
+	hub = &Hub{
 		Clients:    make(map[*Client]bool),
 		Users:      make(map[string]*Client),
 		Register:   make(chan *Client, 1000),
@@ -43,6 +45,11 @@ func NewHub() *Hub {
 		Unregister: make(chan *Client, 1000),
 		Broadcast:  make(chan []byte, 1000),
 	}
+	return hub
+}
+
+func GetHub() *Hub {
+	return hub
 }
 
 func (h *Hub) Run() {

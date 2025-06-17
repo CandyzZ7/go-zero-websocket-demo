@@ -20,7 +20,7 @@ func WsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		currentTime := uint64(time.Now().Unix())
-		h := svcCtx.WSHub
+		h := websocketx.GetHub()
 		msgType := svcCtx.Config.MsgType
 		if svcCtx.Config.Mode == service.DevMode || svcCtx.Config.Mode == service.TestMode {
 			if r.Header.Get("X-Content-MsgType") != "" {
@@ -32,7 +32,7 @@ func WsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		h.Register <- c
 
 		go c.WritePump(r.Context())
-		go c.ReadPump(r.Context())
+		go c.ReadPump(r.Context(), svcCtx)
 
 	}
 }

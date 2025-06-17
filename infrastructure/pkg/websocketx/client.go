@@ -11,6 +11,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 
 	"go-zero-websocket-demo/common/rediskey"
+	"go-zero-websocket-demo/internal/svc"
 )
 
 type Client struct {
@@ -81,7 +82,7 @@ func (c *Client) WritePump(ctx context.Context) {
 	}
 }
 
-func (c *Client) ReadPump(ctx context.Context) {
+func (c *Client) ReadPump(ctx context.Context, svcCtx *svc.ServiceContext) {
 	defer func() {
 		if r := recover(); r != nil {
 			logx.Info("write stop", string(debug.Stack()), r)
@@ -99,7 +100,7 @@ func (c *Client) ReadPump(ctx context.Context) {
 			}
 			break
 		}
-		ProcessData(ctx, c, message)
+		ProcessData(ctx, svcCtx, c, message)
 	}
 }
 

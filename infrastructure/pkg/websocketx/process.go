@@ -12,6 +12,7 @@ import (
 
 	"go-zero-websocket-demo/infrastructure/e"
 	"go-zero-websocket-demo/internal/pb"
+	"go-zero-websocket-demo/internal/svc"
 )
 
 // Request 通用请求数据格式
@@ -93,10 +94,10 @@ func (h *Head) String() (headStr string) {
 }
 
 // DisposeFunc 处理函数（修改data类型为[]byte）
-type DisposeFunc func(client *Client, seq string, message []byte) (data []byte, err error)
+type DisposeFunc func(ctx context.Context, svcCtx *svc.ServiceContext, client *Client, seq string, message []byte) (data []byte, err error)
 
 // MiddlewareFunc 中间件函数类型（修改data类型为[]byte）
-type MiddlewareFunc func(client *Client, seq string, cmd string, message []byte, next DisposeFunc) (data []byte, err error)
+type MiddlewareFunc func(ctx context.Context, svcCtx *svc.ServiceContext, client *Client, seq string, cmd string, message []byte, next DisposeFunc) (data []byte, err error)
 
 // Route 表示一个路由配置
 type Route struct {
@@ -158,55 +159,6 @@ func getRoute(key string) (route Route, ok bool) {
 	defer routesRWMutex.RUnlock()
 	route, ok = routes[key]
 	return
-}
-
-// ProcessData 处理数据
-func ProcessData(ctx context.Context, client *Client, message []byte) {
-	defer func() {
-		if r := recover(); r != nil {
-			logc.Error(ctx, "process data panic", r)
-			sendErrorResponse(ctx, client, client.MsgType, e.SystemError, "", "")
-		}
-	}()
-
-	// 消息处理逻辑
-	var (
-		seq, cmd string
-		data     []byte
-		status   = e.OK
-	)
-
-	// 解析请求
-	requestData, err := parseRequest(ctx, client.MsgType, message)
-	if err != nil {
-		status = e.ParseError
-		sendErrorResponse(ctx, client, client.MsgType, status, seq, cmd)
-		return
-	}
-	seq, cmd, data = requestData.Seq, requestData.Cmd, requestData.Data
-	if cmd != "heartbeat" {
-		logc.Infof(ctx, "client Received seq:%s,cmd:%s,message:%s,addr:%s,appID:%s,userID:%s", seq, cmd, message, client.Addr, client.AppID, client.UserID)
-	}
-	// 路由处理
-	route, ok := getRoute(cmd)
-	if !ok {
-		status = e.NotFoundRoute
-		sendErrorResponse(ctx, client, client.MsgType, status, seq, cmd)
-		logc.Error(ctx, "route not found", client.Addr, "cmd", cmd)
-		return
-	}
-
-	// 创建处理链并执行
-	handler := chainMiddlewares(route.Handler, route.Middlewares, client, cmd)
-	responseData, err := handler(client, seq, data)
-	if err != nil {
-		status = e.ErrHandler(err)
-	}
-
-	// 构建并发送响应
-	if err := sendSuccessResponse(ctx, client, client.MsgType, seq, cmd, status, responseData); err != nil {
-		logc.Error(ctx, "send response failed", err)
-	}
 }
 
 // RequestData 封装解析后的请求数据
@@ -311,6 +263,55 @@ func sendResponse(ctx context.Context, client *Client, response interface{}, msg
 	return nil
 }
 
+// ProcessData 处理数据
+func ProcessData(ctx context.Context, svcCtx *svc.ServiceContext, client *Client, message []byte) {
+	defer func() {
+		if r := recover(); r != nil {
+			logc.Error(ctx, "process data panic", r)
+			sendErrorResponse(ctx, client, client.MsgType, e.SystemError, "", "")
+		}
+	}()
+
+	// 消息处理逻辑
+	var (
+		seq, cmd string
+		data     []byte
+		status   = e.OK
+	)
+
+	// 解析请求
+	requestData, err := parseRequest(ctx, client.MsgType, message)
+	if err != nil {
+		status = e.ParseError
+		sendErrorResponse(ctx, client, client.MsgType, status, seq, cmd)
+		return
+	}
+	seq, cmd, data = requestData.Seq, requestData.Cmd, requestData.Data
+	if cmd != "heartbeat" {
+		logc.Infof(ctx, "client Received seq:%s,cmd:%s,message:%s,addr:%s,appID:%s,userID:%s", seq, cmd, message, client.Addr, client.AppID, client.UserID)
+	}
+	// 路由处理
+	route, ok := getRoute(cmd)
+	if !ok {
+		status = e.NotFoundRoute
+		sendErrorResponse(ctx, client, client.MsgType, status, seq, cmd)
+		logc.Error(ctx, "route not found", client.Addr, "cmd", cmd)
+		return
+	}
+
+	// 创建处理链并执行
+	handler := chainMiddlewares(route.Handler, route.Middlewares, client, cmd)
+	responseData, err := handler(ctx, svcCtx, client, seq, data)
+	if err != nil {
+		status = e.ErrHandler(err)
+	}
+
+	// 构建并发送响应
+	if err := sendSuccessResponse(ctx, client, client.MsgType, seq, cmd, status, responseData); err != nil {
+		logc.Error(ctx, "send response failed", err)
+	}
+}
+
 // chainMiddlewares 将中间件链接成处理链
 func chainMiddlewares(final DisposeFunc, middlewares []MiddlewareFunc, client *Client, cmd string) DisposeFunc {
 	// 直接返回最终处理函数（无中间件）
@@ -319,7 +320,7 @@ func chainMiddlewares(final DisposeFunc, middlewares []MiddlewareFunc, client *C
 	}
 
 	// 从后向前构建中间件链（保持注册顺序）
-	return func(client *Client, seq string, message []byte) ([]byte, error) {
+	return func(ctx context.Context, svcCtx *svc.ServiceContext, client *Client, seq string, message []byte) ([]byte, error) {
 		// 当前处理函数初始化为最终处理函数
 		currentHandler := final
 
@@ -331,12 +332,12 @@ func chainMiddlewares(final DisposeFunc, middlewares []MiddlewareFunc, client *C
 			prevHandler := currentHandler
 
 			// 创建新的处理函数，将当前中间件和前一个处理函数链接起来
-			currentHandler = func(client *Client, s string, msg []byte) ([]byte, error) {
-				return middleware(client, s, cmd, msg, prevHandler)
+			currentHandler = func(ctx context.Context, svcCtx *svc.ServiceContext, client *Client, s string, msg []byte) ([]byte, error) {
+				return middleware(ctx, svcCtx, client, s, cmd, msg, prevHandler)
 			}
 		}
 
 		// 执行构建好的中间件链
-		return currentHandler(client, seq, message)
+		return currentHandler(ctx, svcCtx, client, seq, message)
 	}
 }

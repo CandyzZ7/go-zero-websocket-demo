@@ -8,6 +8,7 @@ import (
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
 
+	"go-zero-websocket-demo/infrastructure/pkg/websocketx"
 	"go-zero-websocket-demo/internal/config"
 	"go-zero-websocket-demo/internal/handler"
 	"go-zero-websocket-demo/internal/svc"
@@ -23,7 +24,8 @@ func main() {
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
-
+	wsHub := websocketx.NewHub()
+	go wsHub.Run()
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 	handler.WebsocketInit(context.Background(), ctx)

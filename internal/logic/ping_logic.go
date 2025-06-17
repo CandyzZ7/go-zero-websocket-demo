@@ -16,29 +16,31 @@ type PingLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+	Client *websocketx.Client
 }
 
 // ping
-func NewPingLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PingLogic {
+func NewPingLogic(ctx context.Context, svcCtx *svc.ServiceContext, client *websocketx.Client) *PingLogic {
 	return &PingLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
+		Client: client,
 	}
 }
 
-func (l *PingLogic) Ping(client *websocketx.Client, seq string, message []byte) (data []byte, err error) {
+func Ping(ctx context.Context, svcCtx *svc.ServiceContext, client *websocketx.Client, seq string, message []byte) (data []byte, err error) {
 	req := &pb.PingReq{}
 	err = serializex.Unmarshal(client.MsgType, message, req)
 	if err != nil {
 		return nil, err
 	}
-	logc.Infof(l.ctx, "Received ping request: %v", req)
-	resp, err := l.ping(req)
+	logc.Infof(ctx, "Received ping request: %v", req)
+	resp, err := NewPingLogic(ctx, svcCtx, client).ping(req)
 	if err != nil {
 		return nil, err
 	}
-	logc.Infof(l.ctx, "Sending ping response: %v", resp)
+	logc.Infof(ctx, "Sending ping response: %v", resp)
 	return serializex.Marshal(client.MsgType, resp)
 }
 

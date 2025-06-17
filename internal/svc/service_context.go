@@ -4,24 +4,19 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/redis"
 
 	"go-zero-websocket-demo/infrastructure/pkg/redisx"
-	"go-zero-websocket-demo/infrastructure/pkg/websocketx"
 	"go-zero-websocket-demo/internal/config"
 )
 
 type ServiceContext struct {
 	Config config.Config
-	WSHub  *websocketx.Hub
 	RDB    *redis.Redis
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	rdb := redisx.MustNewRedisClient(c.RedisConf)
-	wsHub := websocketx.NewHub()
-	go wsHub.Run()
 
 	return &ServiceContext{
 		Config: c,
-		WSHub:  wsHub,
 		RDB:    rdb,
 	}
 }

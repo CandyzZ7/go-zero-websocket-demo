@@ -13,5 +13,5 @@ func WebsocketInit(ctx context.Context, svcCtx *svc.ServiceContext) {
 	accountGroup := websocketx.NewGroup("test")
 
 	// 注册账户相关路由
-	accountGroup.Register("ping", logic.NewPingLogic(ctx, svcCtx).Ping)
+	accountGroup.Register("ping", logic.Ping)
 }
