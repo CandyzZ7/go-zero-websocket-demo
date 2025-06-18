@@ -334,7 +334,7 @@ func (h *Hub) GetHubInfo() *HubInfo {
 
 // ClearTimeoutConnections 定时清理超时连接
 func (h *Hub) ClearTimeoutConnections() {
-	currentTime := uint64(time.Now().Unix())
+	currentTime := time.Now().UnixMilli()
 	clients := h.GetClientList()
 	for client := range clients {
 		if client.IsHeartbeatTimeout(currentTime) {

@@ -19,7 +19,7 @@ func WsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		currentTime := uint64(time.Now().Unix())
+		currentTime := time.Now().UnixMilli()
 		h := websocketx.GetHub()
 		msgType := svcCtx.Config.MsgType
 		if svcCtx.Config.Mode == service.DevMode || svcCtx.Config.Mode == service.TestMode {

@@ -22,16 +22,11 @@ type Request struct {
 	Data interface{} `json:"data,omitempty"` // 数据 json
 }
 
-// Login 登录请求数据
-type Login struct {
-	ServiceToken string `json:"serviceToken"` // 验证用户是否登录
-	AppID        uint32 `json:"appID,omitempty"`
-	UserID       string `json:"userID,omitempty"`
-}
-
-// HeartBeat 心跳请求数据
-type HeartBeat struct {
-	UserID string `json:"userID,omitempty"`
+// RequestData 封装解析后的请求数据
+type RequestData struct {
+	Seq  string
+	Cmd  string
+	Data []byte
 }
 
 // Head 响应数据头
@@ -41,19 +36,18 @@ type Head struct {
 	Response *Response `json:"response"` // 消息体
 }
 
+// String to string
+func (h *Head) String() (headStr string) {
+	headBytes, _ := json.Marshal(h)
+	headStr = string(headBytes)
+	return
+}
+
 // Response 响应数据体
 type Response struct {
 	Code uint32      `json:"code"`
 	Msg  string      `json:"msg"`
 	Data interface{} `json:"data"` // 数据 json
-}
-
-// PushMsg 数据结构体
-type PushMsg struct {
-	Seq  string `json:"seq"`
-	Uuid uint64 `json:"uuid"`
-	Type string `json:"type"`
-	Msg  string `json:"msg"`
 }
 
 // NewJsonMessageResponse 设置返回消息
@@ -84,13 +78,6 @@ func NewProtoMessageResponse(seq string, cmd string, code *e.StatusCode, data []
 // NewProtoResponse 创建新的响应
 func NewProtoResponse(code *e.StatusCode, data []byte) *pb.Response {
 	return &pb.Response{Code: int32(code.Code), Msg: code.Message, Data: data}
-}
-
-// String to string
-func (h *Head) String() (headStr string) {
-	headBytes, _ := json.Marshal(h)
-	headStr = string(headBytes)
-	return
 }
 
 // DisposeFunc 处理函数（修改data类型为[]byte）
@@ -159,13 +146,6 @@ func getRoute(key string) (route Route, ok bool) {
 	defer routesRWMutex.RUnlock()
 	route, ok = routes[key]
 	return
-}
-
-// RequestData 封装解析后的请求数据
-type RequestData struct {
-	Seq  string
-	Cmd  string
-	Data []byte
 }
 
 // parseRequest 解析不同类型的请求

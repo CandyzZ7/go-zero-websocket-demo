@@ -22,14 +22,14 @@ type Client struct {
 	Send          chan []byte // 待发送的数据
 	AppID         string      // 登录的平台ID app/web/ios
 	UserID        string      // 用户ID，用户登录以后才有
-	FirstTime     uint64      // 首次连接事件
-	HeartbeatTime uint64      // 用户上次心跳时间
-	LoginTime     uint64      // 登录时间 登录以后才有
+	FirstTime     int64       // 首次连接事件
+	HeartbeatTime int64       // 用户上次心跳时间
+	LoginTime     int64       // 登录时间 登录以后才有
 	MsgType       string
 }
 
 // NewClient 初始化
-func NewClient(h *Hub, addr string, conn *websocket.Conn, firstTime uint64, msgType string) (client *Client) {
+func NewClient(h *Hub, addr string, conn *websocket.Conn, firstTime int64, msgType string) (client *Client) {
 	client = &Client{
 		Hub:           h,
 		Addr:          addr,
@@ -127,7 +127,7 @@ func (c *Client) close() {
 }
 
 // Login 用户登录
-func (c *Client) Login(appID string, userID string, loginTime uint64) {
+func (c *Client) Login(appID string, userID string, loginTime int64) {
 	c.AppID = appID
 	c.UserID = userID
 	c.LoginTime = loginTime
@@ -136,14 +136,14 @@ func (c *Client) Login(appID string, userID string, loginTime uint64) {
 }
 
 // Heartbeat 用户心跳
-func (c *Client) Heartbeat(currentTime uint64) {
+func (c *Client) Heartbeat(currentTime int64) {
 	c.HeartbeatTime = currentTime
 
 	return
 }
 
 // IsHeartbeatTimeout 心跳超时
-func (c *Client) IsHeartbeatTimeout(currentTime uint64) (timeout bool) {
+func (c *Client) IsHeartbeatTimeout(currentTime int64) (timeout bool) {
 	if c.HeartbeatTime+heartbeatExpirationTime <= currentTime {
 		timeout = true
 	}

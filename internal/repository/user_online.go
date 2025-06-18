@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/zeromicro/go-zero/core/stores/redis"
+
 	"go-zero-websocket-demo/common/rediskey"
 	"go-zero-websocket-demo/infrastructure/pkg/redisx"
 	"go-zero-websocket-demo/internal/model"
@@ -17,6 +19,9 @@ func GetUserOnlineByAppIDAndUserID(ctx context.Context, appID, userID string) (*
 	data, err := redisClient.Get(key)
 	if err != nil {
 		return nil, err
+	}
+	if data == "" {
+		return nil, redis.Nil
 	}
 	userOnline := &model.UserOnline{}
 
