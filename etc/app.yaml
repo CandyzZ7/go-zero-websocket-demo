@@ -5,6 +5,13 @@ Verbose: true
 Mode: dev
 MsgType: proto
 
+TokenConf:
+  AccessSecret: ydgame_secret
+  AccessExpire: 604800
+  RefreshSecret: ydgame
+  RefreshExpire: 2592000
+  RefreshAfter: 604800
+
 Log:
   ServiceName: "websocket_demo"
   Mode: "console"
@@ -21,7 +28,7 @@ Signature:
   Strict: false                   # 是否开启校验，调试的时候可以关掉，默认是关闭
   Expiry: 1h										 # 签名字段的过期时间，默认 1 h
   PrivateKeys:									 # 密钥以及指纹，密钥是上面 RSA 文件位置，指纹自定义，可以多组
-    - Fingerprint: "websocket_demo"
+    - Fingerprint: "ydgame"
       KeyFile: D:\work\secret\id_rsa
 
 MysqlConf:
