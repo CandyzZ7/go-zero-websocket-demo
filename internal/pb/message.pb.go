@@ -201,6 +201,270 @@ func (x *Response) GetData() []byte {
 	return nil
 }
 
+type HeartbeatReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HeartbeatReq) Reset() {
+	*x = HeartbeatReq{}
+	mi := &file_internal_proto_message_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HeartbeatReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HeartbeatReq) ProtoMessage() {}
+
+func (x *HeartbeatReq) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_proto_message_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HeartbeatReq.ProtoReflect.Descriptor instead.
+func (*HeartbeatReq) Descriptor() ([]byte, []int) {
+	return file_internal_proto_message_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *HeartbeatReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type HeartbeatResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HeartbeatResp) Reset() {
+	*x = HeartbeatResp{}
+	mi := &file_internal_proto_message_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HeartbeatResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HeartbeatResp) ProtoMessage() {}
+
+func (x *HeartbeatResp) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_proto_message_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HeartbeatResp.ProtoReflect.Descriptor instead.
+func (*HeartbeatResp) Descriptor() ([]byte, []int) {
+	return file_internal_proto_message_proto_rawDescGZIP(), []int{4}
+}
+
+type PingReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Msg           string                 `protobuf:"bytes,1,opt,name=msg,proto3" json:"msg,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PingReq) Reset() {
+	*x = PingReq{}
+	mi := &file_internal_proto_message_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PingReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PingReq) ProtoMessage() {}
+
+func (x *PingReq) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_proto_message_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PingReq.ProtoReflect.Descriptor instead.
+func (*PingReq) Descriptor() ([]byte, []int) {
+	return file_internal_proto_message_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *PingReq) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
+type PingResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Msg           string                 `protobuf:"bytes,1,opt,name=msg,proto3" json:"msg,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PingResp) Reset() {
+	*x = PingResp{}
+	mi := &file_internal_proto_message_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PingResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PingResp) ProtoMessage() {}
+
+func (x *PingResp) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_proto_message_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PingResp.ProtoReflect.Descriptor instead.
+func (*PingResp) Descriptor() ([]byte, []int) {
+	return file_internal_proto_message_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *PingResp) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
+type LoginReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	AppId         string                 `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LoginReq) Reset() {
+	*x = LoginReq{}
+	mi := &file_internal_proto_message_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginReq) ProtoMessage() {}
+
+func (x *LoginReq) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_proto_message_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LoginReq.ProtoReflect.Descriptor instead.
+func (*LoginReq) Descriptor() ([]byte, []int) {
+	return file_internal_proto_message_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *LoginReq) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *LoginReq) GetAppId() string {
+	if x != nil {
+		return x.AppId
+	}
+	return ""
+}
+
+func (x *LoginReq) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+type LoginResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LoginResp) Reset() {
+	*x = LoginResp{}
+	mi := &file_internal_proto_message_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginResp) ProtoMessage() {}
+
+func (x *LoginResp) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_proto_message_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LoginResp.ProtoReflect.Descriptor instead.
+func (*LoginResp) Descriptor() ([]byte, []int) {
+	return file_internal_proto_message_proto_rawDescGZIP(), []int{8}
+}
+
 var File_internal_proto_message_proto protoreflect.FileDescriptor
 
 const file_internal_proto_message_proto_rawDesc = "" +
@@ -217,7 +481,19 @@ const file_internal_proto_message_proto_rawDesc = "" +
 	"\bResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x10\n" +
 	"\x03msg\x18\x02 \x01(\tR\x03msg\x12\x12\n" +
-	"\x04data\x18\x03 \x01(\fR\x04dataB\x06Z\x04./pbb\x06proto3"
+	"\x04data\x18\x03 \x01(\fR\x04data\"'\n" +
+	"\fHeartbeatReq\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"\x0f\n" +
+	"\rHeartbeatResp\"\x1b\n" +
+	"\aPingReq\x12\x10\n" +
+	"\x03msg\x18\x01 \x01(\tR\x03msg\"\x1c\n" +
+	"\bPingResp\x12\x10\n" +
+	"\x03msg\x18\x01 \x01(\tR\x03msg\"P\n" +
+	"\bLoginReq\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x15\n" +
+	"\x06app_id\x18\x02 \x01(\tR\x05appId\x12\x14\n" +
+	"\x05token\x18\x03 \x01(\tR\x05token\"\v\n" +
+	"\tLoginRespB\x06Z\x04./pbb\x06proto3"
 
 var (
 	file_internal_proto_message_proto_rawDescOnce sync.Once
@@ -231,11 +507,17 @@ func file_internal_proto_message_proto_rawDescGZIP() []byte {
 	return file_internal_proto_message_proto_rawDescData
 }
 
-var file_internal_proto_message_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_internal_proto_message_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_internal_proto_message_proto_goTypes = []any{
 	(*MessageRequest)(nil),  // 0: pb.MessageRequest
 	(*MessageResponse)(nil), // 1: pb.MessageResponse
 	(*Response)(nil),        // 2: pb.Response
+	(*HeartbeatReq)(nil),    // 3: pb.HeartbeatReq
+	(*HeartbeatResp)(nil),   // 4: pb.HeartbeatResp
+	(*PingReq)(nil),         // 5: pb.PingReq
+	(*PingResp)(nil),        // 6: pb.PingResp
+	(*LoginReq)(nil),        // 7: pb.LoginReq
+	(*LoginResp)(nil),       // 8: pb.LoginResp
 }
 var file_internal_proto_message_proto_depIdxs = []int32{
 	2, // 0: pb.MessageResponse.response:type_name -> pb.Response
@@ -257,7 +539,7 @@ func file_internal_proto_message_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_proto_message_proto_rawDesc), len(file_internal_proto_message_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -18,6 +18,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: WsHandler(serverCtx),
 			},
 		},
-		// rest.WithSignature(serverCtx.Config.Signature),
+		rest.WithSignature(serverCtx.Config.Signature),
 	)
 }

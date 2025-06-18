@@ -13,13 +13,15 @@ func _() {
 	_ = x[SystemErrorCode - -2]
 	_ = x[ParseErrorCode - -3]
 	_ = x[NotLoggedInCode-1000]
+	_ = x[ErrTokenVerifyFailCode-2001]
 	_ = x[NotFoundRouteCode-4001]
 }
 
 const (
 	_Code_name_0 = "Parse ErrorSystem ErrorServer ErrorOK"
 	_Code_name_1 = "Not Logged In"
-	_Code_name_2 = "Not Found Route"
+	_Code_name_2 = "Token Verify Fail"
+	_Code_name_3 = "Not Found Route"
 )
 
 var (
@@ -33,8 +35,10 @@ func (i Code) String() string {
 		return _Code_name_0[_Code_index_0[i]:_Code_index_0[i+1]]
 	case i == 1000:
 		return _Code_name_1
-	case i == 4001:
+	case i == 2001:
 		return _Code_name_2
+	case i == 4001:
+		return _Code_name_3
 	default:
 		return "Code(" + strconv.FormatInt(int64(i), 10) + ")"
 	}

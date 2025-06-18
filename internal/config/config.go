@@ -12,4 +12,13 @@ type Config struct {
 	RedisConf redis.RedisConf
 	MsgType   string
 	MysqlConf ormengine.MysqlConf
+	TokenConf TokenConf
+}
+
+type TokenConf struct {
+	AccessSecret  string
+	AccessExpire  int64
+	RefreshSecret string
+	RefreshExpire int64
+	RefreshAfter  int64
 }

@@ -18,6 +18,10 @@ const (
 )
 
 const (
+	ErrTokenVerifyFailCode Code = 2001 // Token Verify Fail
+)
+
+const (
 	// NotFoundRouteCode  未找到路由
 	NotFoundRouteCode Code = 4001 // Not Found Route
 )

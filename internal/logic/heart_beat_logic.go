@@ -40,12 +40,12 @@ func Heartbeat(ctx context.Context, svcCtx *svc.ServiceContext, client *websocke
 	if err != nil {
 		return nil, err
 	}
-	logc.Infof(ctx, "Received ping request: %v", req)
+	logc.Infof(ctx, "Received heart beat request: %v", req)
 	resp, err := NewHeartbeatLogic(ctx, svcCtx, client).Heartbeat(req)
 	if err != nil {
 		return nil, err
 	}
-	logc.Infof(ctx, "Sending ping response: %v", resp)
+	logc.Infof(ctx, "Sending heart beat response: %v", resp)
 	return serializex.Marshal(client.MsgType, resp)
 }
 

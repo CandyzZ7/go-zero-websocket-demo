@@ -11,8 +11,8 @@ const (
 )
 
 type UserOnline struct {
-	AccIp         string `json:"accIp"`         // acc Ip
-	AccPort       string `json:"accPort"`       // acc 端口
+	// AccIp         string `json:"accIp"`         // acc Ip
+	// AccPort       string `json:"accPort"`       // acc 端口
 	AppID         string `json:"appID"`         // appID
 	UserID        string `json:"userID"`        // 用户ID
 	ClientIp      string `json:"clientIp"`      // 客户端Ip
@@ -31,9 +31,9 @@ func (m *UserOnline) Heartbeat(currentTime int64) {
 	m.IsLogoff = false
 }
 
-func (m *UserOnline) Login(accIp, accPort string, appID string, userID string, addr string, loginTime int64) {
-	m.AccIp = accIp
-	m.AccPort = accPort
+func (m *UserOnline) Login(appID string, userID string, addr string, loginTime int64) {
+	// m.AccIp = accIp
+	// m.AccPort = accPort
 	m.AppID = appID
 	m.UserID = userID
 	m.ClientIp = addr
@@ -65,9 +65,9 @@ func (m *UserOnline) IsOnline() bool {
 	return true
 }
 
-func (m *UserOnline) UserIsLocal(localIp, localPort string) (result bool) {
-	if m.AccIp == localIp && m.AccPort == localPort {
-		return true
-	}
-	return false
-}
+// func (m *UserOnline) UserIsLocal(localIp, localPort string) (result bool) {
+// 	if m.AccIp == localIp && m.AccPort == localPort {
+// 		return true
+// 	}
+// 	return false
+// }

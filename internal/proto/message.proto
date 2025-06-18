@@ -21,3 +21,29 @@ message Response{
   string msg = 2;
   bytes data = 3;
 }
+
+message HeartbeatReq {
+  string user_id = 1;
+}
+
+message HeartbeatResp {
+
+}
+
+message PingReq {
+  string msg = 1;
+}
+
+message PingResp {
+  string msg = 1;
+}
+
+message LoginReq {
+  string user_id = 1;
+  string app_id = 2;
+  string token = 3;
+}
+
+message LoginResp {
+
+}

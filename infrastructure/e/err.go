@@ -8,6 +8,10 @@ var (
 )
 
 var (
+	ErrTokenVerifyFail = newStatusCode(ErrTokenVerifyFailCode, ErrTokenVerifyFailCode.String())
+)
+
+var (
 	NotLoggedIn = newStatusCode(NotLoggedInCode, NotLoggedInCode.String())
 )
 

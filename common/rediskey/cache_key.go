@@ -8,6 +8,10 @@ const (
 	UserOnline RedisKey = "user_online"
 )
 
+const (
+	TokenKey RedisKey = "token"
+)
+
 func (key RedisKey) WithSymbol(symbol string) string {
 	return string(key) + "_" + symbol
 }
