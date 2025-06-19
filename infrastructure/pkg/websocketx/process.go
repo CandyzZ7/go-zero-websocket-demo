@@ -45,7 +45,7 @@ func (h *Head) String() (headStr string) {
 
 // Response 响应数据体
 type Response struct {
-	Code uint32      `json:"code"`
+	Code int32       `json:"code"`
 	Msg  string      `json:"msg"`
 	Data interface{} `json:"data"` // 数据 json
 }
@@ -66,7 +66,7 @@ func NewJsonResponse(code *e.StatusCode, data []byte) *Response {
 	if err != nil {
 		logx.Errorf("json.Unmarshal error: %v", err)
 	}
-	return &Response{Code: uint32(code.Code), Msg: code.Message, Data: result}
+	return &Response{Code: int32(uint32(code.Code)), Msg: code.Message, Data: result}
 }
 
 // NewProtoMessageResponse 设置返回消息
