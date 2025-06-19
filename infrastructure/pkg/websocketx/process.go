@@ -47,7 +47,7 @@ func (h *Head) String() (headStr string) {
 type Response struct {
 	Code int32       `json:"code"`
 	Msg  string      `json:"msg"`
-	Data interface{} `json:"data"` // 数据 json
+	Data interface{} `json:"data,omitempty"`
 }
 
 // NewJsonMessageResponse 设置返回消息
