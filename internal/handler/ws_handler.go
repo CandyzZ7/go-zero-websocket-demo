@@ -1,21 +1,23 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/service"
 
-	websocketx "go-zero-websocket-demo/infrastructure/pkg/websocketx"
+	"go-zero-websocket-demo/infrastructure/pkg/websocketx"
 	"go-zero-websocket-demo/internal/svc"
 )
 
 func WsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithoutCancel(r.Context())
 		conn, err := websocketx.Upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			logc.Errorf(r.Context(), "error upgrading to WebSocket: %v", err)
+			logc.Errorf(ctx, "error upgrading to WebSocket: %v", err)
 			return
 		}
 
@@ -31,8 +33,8 @@ func WsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		c := websocketx.NewClient(h, conn.RemoteAddr().String(), conn, currentTime, msgType)
 		h.Register <- c
 
-		go c.WritePump(r.Context())
-		go c.ReadPump(r.Context(), svcCtx)
+		go c.WritePump(ctx)
+		go c.ReadPump(ctx, svcCtx)
 
 	}
 }
