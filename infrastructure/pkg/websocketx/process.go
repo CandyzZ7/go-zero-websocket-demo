@@ -60,13 +60,15 @@ func NewJsonMessageResponse(seq string, cmd string, code *e.StatusCode, data []b
 func NewJsonResponse(code *e.StatusCode, data []byte) *Response {
 	// 用于存放解析结果的map
 	var result map[string]interface{}
-
-	// 解析JSON数据
-	err := json.Unmarshal(data, &result)
-	if err != nil {
-		logx.Errorf("json.Unmarshal error: %v", err)
+	if len(data) > 0 {
+		// 解析JSON数据
+		err := json.Unmarshal(data, &result)
+		if err != nil {
+			logx.Errorf("json.Unmarshal error: %v", err)
+		}
 	}
-	return &Response{Code: int32(uint32(code.Code)), Msg: code.Message, Data: result}
+
+	return &Response{Code: int32(code.Code), Msg: code.Message, Data: result}
 }
 
 // NewProtoMessageResponse 设置返回消息
