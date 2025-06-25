@@ -47,7 +47,7 @@ func (h *Head) String() (headStr string) {
 type Response struct {
 	Code int32       `json:"code"`
 	Msg  string      `json:"msg"`
-	Data interface{} `json:"data,omitempty"`
+	Data interface{} `json:"data,omitempty"` // 数据 json
 }
 
 // NewJsonMessageResponse 设置返回消息
@@ -286,6 +286,8 @@ func ProcessData(ctx context.Context, svcCtx *svc.ServiceContext, client *Client
 	responseData, err := handler(ctx, svcCtx, client, seq, data)
 	if err != nil {
 		status = e.ErrHandler(err)
+		sendErrorResponse(ctx, client, client.MsgType, status, seq, cmd)
+		return
 	}
 
 	// 构建并发送响应

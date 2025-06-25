@@ -77,6 +77,11 @@ func (h *Hub) EventLogin(client *Client) {
 	// 连接存在，在添加
 	if h.InClient(client) {
 		userKey := rediskey.RedisKey(rediskey.WebSocketKey.WithParams(client.AppID)).WithSymbol(client.UserID)
+		// 判断是否为相同的用户
+		if oldClient, ok := h.Users[userKey]; ok {
+			// 挤下线
+			h.EventUnregister(oldClient)
+		}
 		h.AddUsers(userKey, client)
 	}
 }

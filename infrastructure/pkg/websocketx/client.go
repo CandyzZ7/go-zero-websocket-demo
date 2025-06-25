@@ -3,6 +3,7 @@ package websocketx
 import (
 	"context"
 	"fmt"
+	"io"
 	"runtime/debug"
 	"sync"
 	"time"
@@ -61,10 +62,18 @@ func (c *Client) WritePump(ctx context.Context) {
 				_ = c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-
-			w, err := c.Conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				return
+			var w io.WriteCloser
+			if c.MsgType == "proto" {
+				w, err = c.Conn.NextWriter(websocket.BinaryMessage)
+				if err != nil {
+					return
+				}
+			}
+			if c.MsgType == "json" {
+				w, err = c.Conn.NextWriter(websocket.TextMessage)
+				if err != nil {
+					return
+				}
 			}
 			_, _ = w.Write(message)
 
