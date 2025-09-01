@@ -24,13 +24,6 @@ RedisConf:
   Host: "127.0.0.1:6379"
   Pass: "123456"
 
-Signature:
-  Strict: false                   # 是否开启校验，调试的时候可以关掉，默认是关闭
-  Expiry: 1h										 # 签名字段的过期时间，默认 1 h
-  PrivateKeys:									 # 密钥以及指纹，密钥是上面 RSA 文件位置，指纹自定义，可以多组
-    - Fingerprint: "ydgame"
-      KeyFile: D:\work\secret\id_rsa
-
 MysqlConf:
   DataSource: root:yd123456@tcp(47.120.79.159:3306)/badouye?charset=utf8mb4&parseTime=True&loc=Local
   MaxIdleConns: 10

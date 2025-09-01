@@ -17,7 +17,6 @@ import (
 
 type Client struct {
 	Conn          *websocket.Conn
-	Hub           *Hub
 	mu            sync.Mutex
 	Addr          string      // 客户端地址
 	Send          chan []byte // 待发送的数据
@@ -30,9 +29,8 @@ type Client struct {
 }
 
 // NewClient 初始化
-func NewClient(h *Hub, addr string, conn *websocket.Conn, firstTime int64, msgType string) (client *Client) {
+func NewClient(addr string, conn *websocket.Conn, firstTime int64, msgType string) (client *Client) {
 	client = &Client{
-		Hub:           h,
 		Addr:          addr,
 		Conn:          conn,
 		Send:          make(chan []byte, 100),
@@ -52,7 +50,7 @@ func (c *Client) WritePump(ctx context.Context) {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.Hub.Unregister <- c
+		GetHub().Unregister <- c
 	}()
 	for {
 		select {

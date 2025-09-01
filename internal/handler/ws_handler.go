@@ -30,7 +30,7 @@ func WsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			}
 		}
 
-		c := websocketx.NewClient(h, conn.RemoteAddr().String(), conn, currentTime, msgType)
+		c := websocketx.NewClient(conn.RemoteAddr().String(), conn, currentTime, msgType)
 		h.Register <- c
 
 		go c.WritePump(ctx)
