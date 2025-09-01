@@ -9,6 +9,7 @@ import (
 	"github.com/zeromicro/go-zero/core/service"
 
 	"go-zero-websocket-demo/infrastructure/pkg/websocketx"
+	"go-zero-websocket-demo/infrastructure/pkg/xhttp"
 	"go-zero-websocket-demo/internal/svc"
 )
 
@@ -30,7 +31,7 @@ func WsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			}
 		}
 
-		c := websocketx.NewClient(conn.RemoteAddr().String(), conn, currentTime, msgType)
+		c := websocketx.NewClient(xhttp.GetClientIP(r), conn, currentTime, msgType)
 		h.Register <- c
 
 		go c.WritePump(ctx)

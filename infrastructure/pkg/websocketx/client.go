@@ -19,6 +19,7 @@ type Client struct {
 	Conn          *websocket.Conn
 	mu            sync.Mutex
 	Addr          string      // 客户端地址
+	IP            string      // IP地址
 	Send          chan []byte // 待发送的数据
 	AppID         string      // 登录的平台ID app/web/ios
 	UserID        string      // 用户ID，用户登录以后才有
@@ -29,9 +30,10 @@ type Client struct {
 }
 
 // NewClient 初始化
-func NewClient(addr string, conn *websocket.Conn, firstTime int64, msgType string) (client *Client) {
+func NewClient(ip string, conn *websocket.Conn, firstTime int64, msgType string) (client *Client) {
 	client = &Client{
-		Addr:          addr,
+		Addr:          conn.RemoteAddr().String(),
+		IP:            ip,
 		Conn:          conn,
 		Send:          make(chan []byte, 100),
 		FirstTime:     firstTime,
